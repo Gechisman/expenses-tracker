@@ -12,7 +12,7 @@ import { LanguageToggle } from './components/LanguageToggle';
 import { Transaction, Category } from './types';
 import { initialCategories, translations } from './data';
 import { useAppStore } from './store';
-import { Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, X, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 
 type View = 'calendar' | 'categories' | 'monthly';
 
@@ -24,6 +24,7 @@ function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem('transactions');
     return saved ? JSON.parse(saved) : [];
@@ -94,17 +95,32 @@ function App() {
     setCategories(categories.filter(c => c.id !== categoryId));
   };
 
+  const handleViewChange = (view: View) => {
+    setCurrentView(view);
+    setShowMobileMenu(false);
+  };
+
   return (
     <div className={`min-h-screen bg-gray-100 dark:bg-gray-900 py-8 px-4 transition-colors`}>
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t.title}</h1>
-          <div className="flex items-center space-x-4">
+          
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="sm:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
+          >
+            <Menu size={24} />
+          </button>
+
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex items-center space-x-4">
             <LanguageToggle />
             <ThemeToggle />
             <div className="flex space-x-4">
               <button
-                onClick={() => setCurrentView('calendar')}
+                onClick={() => handleViewChange('calendar')}
                 className={`px-4 py-2 rounded-lg ${
                   currentView === 'calendar'
                     ? 'bg-blue-600 text-white'
@@ -114,7 +130,7 @@ function App() {
                 {t.calendar}
               </button>
               <button
-                onClick={() => setCurrentView('monthly')}
+                onClick={() => handleViewChange('monthly')}
                 className={`px-4 py-2 rounded-lg ${
                   currentView === 'monthly'
                     ? 'bg-blue-600 text-white'
@@ -124,7 +140,7 @@ function App() {
                 {t.monthlySummary}
               </button>
               <button
-                onClick={() => setCurrentView('categories')}
+                onClick={() => handleViewChange('categories')}
                 className={`px-4 py-2 rounded-lg ${
                   currentView === 'categories'
                     ? 'bg-blue-600 text-white'
@@ -135,6 +151,48 @@ function App() {
               </button>
             </div>
           </div>
+
+          {/* Mobile Navigation */}
+          {showMobileMenu && (
+            <div className="sm:hidden w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 space-y-4">
+              <div className="flex justify-end space-x-4 mb-4">
+                <LanguageToggle />
+                <ThemeToggle />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <button
+                  onClick={() => handleViewChange('calendar')}
+                  className={`px-4 py-2 rounded-lg ${
+                    currentView === 'calendar'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {t.calendar}
+                </button>
+                <button
+                  onClick={() => handleViewChange('monthly')}
+                  className={`px-4 py-2 rounded-lg ${
+                    currentView === 'monthly'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {t.monthlySummary}
+                </button>
+                <button
+                  onClick={() => handleViewChange('categories')}
+                  className={`px-4 py-2 rounded-lg ${
+                    currentView === 'categories'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {t.categories}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {currentView === 'categories' ? (
